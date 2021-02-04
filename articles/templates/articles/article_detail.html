@@ -1,0 +1,36 @@
+{% extends 'articles/base.html' %}
+
+{% block content %}
+<div class="post">
+    {% if user.is_authenticated and user == article.author %}
+        <a class="save btn btn-outline-secondary" href="{% url 'edit_article' pk=article.pk %}">Редактировать</a>
+    {% endif %}
+    <h1>{{ article.title }}</h1>
+    {% if article.published_date %}
+        <div class="date">
+            <p>Published by {{ article.author }} on {{ article.published_date }}</p>    
+        </div>
+    {% endif %}        
+    <p class="text-break">{{ article.text }}</p>
+</div>
+<hr>
+{% if user.is_authenticated %}
+<a class="save btn btn-outline-secondary" href="{% url 'leave_comment' pk=article.pk %}">Комментировать</a>
+{% endif %}
+{% for comment in article.comments.all %}
+    {% if user.is_authenticated and user == article.author or comment.approved_comment %}
+    <div class="comment">        
+        <div class="date">{{ comment.created_date }}
+            {% if not comment.approved_comment %}
+                <a class="btn btn-outline-success" href="{% url 'comment_remove' pk=comment.pk %}">Скрыть</a>
+                <a class="btn btn-outline-success" href="{% url 'comment_approve' pk=comment.pk %}">Одобрить</a>
+            {% endif %}
+        </div>
+        <strong>{{ comment.author }}</strong>
+        <p class="text-break">{{ comment.text }}</p>
+    </div>
+    {% endif %}
+{% empty %}
+    <p>Оставьте первый комментарий</p>
+{% endfor %}
+{% endblock %}
